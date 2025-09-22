@@ -1,0 +1,138 @@
+\documentclass[11pt]{article}
+
+\usepackage[sort]{natbib}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{float}
+\PassOptionsToPackage{hyphens}{url}\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[includeheadfoot]{geometry}
+
+
+
+%----- you must not change this -----------------
+\oddsidemargin 0.2cm
+\topmargin -1.0cm
+\textheight 23.0cm
+\textwidth 15.25cm
+\parindent=0pt
+\parskip 1ex
+\renewcommand{\baselinestretch}{1.1}
+\pagestyle{fancy}
+%----------------------------------------------------
+
+
+\lhead{\normalsize \textrm{IoT Lab 3}}
+\chead{}
+\rhead{Summer Semester}
+\lfoot{}
+\cfoot{}
+\rfoot{Internet of Things and Wireless Networks}
+\setlength{\fboxrule}{4pt}\setlength{\fboxsep}{2ex}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\setlength{\fboxrule}{1pt}
+\lstset{columns=flexible}
+
+	
+\begin{document}
+
+
+\begin{center}
+{\Large \bf Lab 3: Build your own mouse }
+\end{center}
+
+
+%---------------- Introduction ------------------
+\section*{General Instructions}
+
+In this lab, you will build your own BLE mouse to control your computer, tablet or phone. 
+
+In this lab, you can get a total of 10 points. 6 points for tasks 1 to 3, 2 points for the demo of your mouse, and 2 points for the presentation.
+
+
+
+\section*{Task 1 - Moving the mouse cursor (2.0 points)}
+
+In this task, you shall use buttons to move the mouse cursor on your device left, right, up, and down.
+
+For this, two buttons should be sufficient. You could use the following pattern, but feel free to extend or modify this.
+
+\begin{itemize}
+    \item Button 1
+    \begin{itemize}
+        \item Single click: move 5px to the right (x-axis)
+        \item Double click: move 5px to the left (x-axis)
+        \item Hold button: continue to previous movement \textit{(if needed, increase step size to 10px)}
+    \end{itemize}
+    \item Button 2
+    \begin{itemize}
+        \item Single click: move 5px up (y-axis)
+        \item Double click: move 5px down (y-axis)
+        \item Hold button: continue to previous movement \textit{(if needed, increase step size to 10px)}
+    \end{itemize}
+\end{itemize}
+
+The best suitable boards for this task are either the nRF52840-DK (with 4 buttons) or the micro:bit v2 (with 2 physical buttons and 4 capacitive buttons\footnote{\url{https://support.microbit.org/support/solutions/articles/19000116318-touch-sensing-on-the-micro-bit}}).
+
+To get started building a mouse in Zephyr, you can combine the GATT Human Interface Device (HID) Service\footnote{\url{https://github.com/zephyrproject-rtos/zephyr/tree/main/samples/bluetooth/peripheral\_hids}} with the Zephyr buttons example\footnote{\url{https://github.com/zephyrproject-rtos/zephyr/tree/main/samples/basic/button}}. We suggest that you combine these two repositories, test it, and then extend it to reach a moving mouse cursor. We strongly suggest that you use the main branch of these two examples and not the 2.7 branch.
+
+\clearpage
+
+Please be aware, that you might encounter the following limitations of your mouse. Not all devices might accept your mouse, maybe due to a lack of security certificates. Former tests were successful on Windows, Linux, Android, older macOS devices (before M1), and older iOS devices (iPad, iPhone). Please note, that on some phones (e.g., iPhone) you will not see a cursor, but it is there, moves, and reacts to clicks.
+
+\textit{Hints: Before implementing mouse clicks, it might be helpful to read about human interface devices\footnote{\url{https://wiki.osdev.org/USB\_Human\_Interface\_Devices}} and report maps\footnote{\url{https://eleccelerator.com/tutorial-about-usb-hid-report-descriptors/}}. To test your mouse, you can use this online service: \url{https://www.onlinemictest.com/de/maus-test/}. For your implementation, Zephyr threads\footnote{\url{https://github.com/zephyrproject-rtos/zephyr/blob/main/samples/basic/threads/src/main.c}}\footnote{\url{https://docs.zephyrproject.org/latest/kernel/services/threads/index.html}} might be helpful as our setting is full of concurrency, but handle with care.}
+
+
+\section*{Task 2 - Mouse button clicks (2.0 points)}
+
+In this task, you shall add button click functionalities to your mouse from task 1.
+
+Use two buttons to perform mouse button clicks.
+
+\begin{itemize}
+    \item Button 3: left mouse button (single click and double click)
+    \item Button 4: right mouse button (single click and double click)
+\end{itemize}
+
+
+
+\section*{Task 3 - Get innovative (2.0 points)}
+
+Instead of moving the mouse with button clicks, do the following. This task is open on purpose.
+
+You can choose one of these five tasks:
+
+\begin{enumerate}
+    \item Use it as a shortcut to start a specific application (or so)
+    \begin{itemize}
+        \item Button 1 starts application X, button 2 stops the music, ...
+    \end{itemize}
+    \item If you have a micro:bit: use the accelerometer to control your mouse along the x- and y-axis
+    \item If you have an Arduino Nano 33 BLE Sense: use the accelerometer or gyroscope to control your mouse along the x- and y-axis
+    \clearpage
+    \item Do a performance evaluation:
+    \begin{itemize}
+        \item Find the limits of the mouse
+        \begin{itemize}
+            \item Push the stability
+            \item Does it reconnect after sleep of the host device?
+            \item How many button press events per second can it handle? (\textit{Note: do not press the button manually, write some code to send button pressed events})
+            \item Find more aspects to evaluate
+        \end{itemize}
+    \end{itemize}
+    \item Be even more innovative and define and implement your own task 3
+\end{enumerate}
+
+\section*{Useful information}
+
+If you choose to use PlatformIO for your implementation, take a look at its debugging capabilities. Just using logging/\texttt{printk} has its limits. Take a look at general PlatformIO debugging\footnote{\url{https://docs.platformio.org/en/latest/plus/debugging.html}} and Zephyr-specific PlatformIO debugging\footnote{\url{https://docs.platformio.org/en/latest/tutorials/nordicnrf52/zephyr\_debugging\_unit\_testing\_inspect.html}}.
+
+A useful function to set your own passkey which you need during pairing is\\\texttt{bt\_passkey\_set(unsigned int passkey)}. Otherwise, print the passkey via UART.
+
+Please note, that you \textbf{can only pair your mouse with a single host!} To avoid "funny" side effects, delete your firmware before pairing the mouse with another host. As an alternative, you can try to use \texttt{CONFIG\_BT\_MAX\_PAIRED} to increase the number of paired devices.
+
+
+\end{document}

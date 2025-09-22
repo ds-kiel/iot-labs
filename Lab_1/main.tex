@@ -1,0 +1,101 @@
+\documentclass[11pt]{article}
+
+\usepackage[sort]{natbib}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[includeheadfoot]{geometry}
+
+
+
+%----- you must not change this -----------------
+\oddsidemargin 0.2cm
+\topmargin -1.0cm
+\textheight 23.0cm
+\textwidth 15.25cm
+\parindent=0pt
+\parskip 1ex
+\renewcommand{\baselinestretch}{1.1}
+\pagestyle{fancy}
+%----------------------------------------------------
+
+
+\lhead{\normalsize \textrm{IoT Lab 1}}
+\chead{}
+\rhead{Summer Semester}
+\lfoot{}
+\cfoot{}
+\rfoot{Internet of Things and Wireless Networks}
+\setlength{\fboxrule}{4pt}\setlength{\fboxsep}{2ex}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\setlength{\fboxrule}{1pt}
+\lstset{columns=flexible}
+
+	
+\begin{document}
+
+
+\begin{center}
+{\Large \bf Lab 1: Single-Hop and Multi-Hop Communication }
+\end{center}
+
+
+%---------------- Introduction ------------------
+\section*{General Instructions}
+
+In this lab, you will implement and evaluate protocols for single-hop and multi-hop communication in IoT networks.
+In the single-hop case, you will build a bidirectional remote control system between two devices.
+In the multi-hop case, you will build a unidirectional system to distribute data to all nodes in a network. For simplicity, we limit ourselves to a line topology. 
+The multi-hop communication part is the first step of the Industrial Communication Challenge we cover in labs 1 and 2.
+
+In this lab, you can get a total of 10 points. 8 points for the implementation and the evaluation, and 2 points for the presentation.
+
+\section*{Industrial Communication Challenge}
+
+For the Industrial Communication Challenge, you are asked by a company to build a sensor network for observing temperature and humidity along a manufacturing line. One point at the edge of the manufacturing line can be connected to the data center, and the company would like to measure temperature and humidity every 10 meters. To try your solution and to compare it to competitors, the company requests you to build a prototype including four measurement points that all collect data every 100ms. They prefer a highly reliable system with the shortest possible collection time and target to receive the data recorded at all nodes after 200~ms at their data center. Moreover, they will test the different systems in parallel, so your solution has to ensure that the nodes running your firmware only become part of your network and are able to withstand interference by other networks close by.
+
+\section*{Part 1 - Single-Hop Communication (1.5 points)}
+
+You start your journey into wireless communication between IoT devices with a simple network of two devices. The two devices are in range of each other and thus can directly communicate with each other.
+
+Your task is to realize a simple remote control system. When you press a button on one device, an LED on the other device should light up. Once you release the button, the LED should turn off again. This should work in both directions.
+
+You shall use Bluetooth Low Energy (BLE) for the communication. You can choose whether you use the advertising mode, the connected mode, or Bluetooth Mesh.
+
+\textit{Hint: Have a look at the examples included with Zephyr and start by modifying them.}
+
+\section*{Part 2 - Evaluation of Part 1 (1.5 point)}
+
+To evaluate the reliability and latency of your system, you will use Renode. Instead of pressing a button, a random timer shall simulate this functionality. When the timer goes off, you shall increase a counter and send the value of the counter to the other node.
+
+You shall log the time your timer went off, and the first reception time of the counter value at the other node. You shall also log the received counter values. With this data, you shall analyze latency and reliability of your communication. Please use plots for your evaluation showing the reliability (e.g. bar plots) for each direction and the latency distribution for each direction.
+
+For Renode, please use and modify the attached simulation script \texttt{Renode\_Lab\_1.resc}. This script exposes two UART terminals \texttt{term\_1} and \texttt{term\_2} via TCP sockets\footnote{\url{https://renode.readthedocs.io/en/latest/host-integration/uart.html}}. You  can use, e.g., Python to read data from them to process it further. You can also take a look at \texttt{pyrenode3} to manage your simulation from Python and have direct access to the output for your evaluation. In the simulation script, you have to adjust the path to the location of the attached modified board description to ensure that not all BLE devices have the same device address.
+
+\section*{Part 3 - Industrial Communication Challenge I (2.5 points)}
+
+In this part of the Industrial Communication Challenge, your task is network formation. Essentially, you should form a network that you can use in the second step for collecting sensor data (Lab 2).
+
+Essentially, your task is to extend part 1 of this lab to allow the multi-hop propagation of a button press. For this part, consider a line topology with 4 nodes, each of them 10 meters apart. When you press a button on an end device, this device initiates the formation of a network and is the only device where button presses have an effect until a reboot of the devices. After forming the network, pressing the button shall turn on the LED on this board and on all the other boards, and releasing the button shall turn off all LEDs.
+
+\section*{Part 4 - Evaluation of Part 3 (2.5 points)}
+
+The evaluation of part 3 generally follows the same guidelines as the previous evaluation. In Renode you can program a specific node with a slightly modified firmware that initiates the network formation on start. This node shall afterward, at random intervals, send a counter value to all other nodes and all nodes shall log the reception times and counter values they received. With this data, you shall analyze latency and reliability of each of the three receivers in your network. Please use plots again to visualize your results.
+
+\clearpage
+
+You shall run your evaluation both with a range-based wireless medium without loss (line 23 in \texttt{Renode\_Lab\_1.resc}), and with loss (line 24). Comment in the respective line.
+
+For your Renode simulation, you shall comment in the lines 29, 30, 49–61, and 110–114.
+
+\section*{Part 5 (Optional)}
+
+In preparation for the second part of the Industrial Communication Challenge, you can run two of your networks in parallel and validate that nodes only join the network they are supposed to be a part of. Think of a solution how you can realize this. To test this, you can comment in the lines regarding the interferer firmware in \texttt{Renode\_Lab\_1.resc}. Evaluating this will be part of lab 2.
+
+
+\end{document}

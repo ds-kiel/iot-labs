@@ -1,0 +1,116 @@
+\documentclass[11pt]{article}
+
+\usepackage[sort]{natbib}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[includeheadfoot]{geometry}
+
+
+
+%----- you must not change this -----------------
+\oddsidemargin 0.2cm
+\topmargin -1.0cm
+\textheight 23.0cm
+\textwidth 15.25cm
+\parindent=0pt
+\parskip 1ex
+\renewcommand{\baselinestretch}{1.1}
+\pagestyle{fancy}
+%----------------------------------------------------
+
+
+\lhead{\normalsize \textrm{IoT Lab 2}}
+\chead{}
+\rhead{Summer Semester}
+\lfoot{}
+\cfoot{}
+\rfoot{Internet of Things and Wireless Networks}
+\setlength{\fboxrule}{4pt}\setlength{\fboxsep}{2ex}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\setlength{\fboxrule}{1pt}
+\lstset{columns=flexible}
+
+	
+\begin{document}
+
+
+\begin{center}
+{\Large \bf Lab 2: Industrial Communication Challenge II\\(Multi-Hop Collection) }
+\end{center}
+
+
+%---------------- Introduction ------------------
+\section*{General Instructions}
+
+In this lab, you will implement and evaluate protocols for multi-hop communication in IoT networks. You will build a system that collects data from all nodes in the network. For simplicity, we limit ourselves to a line topology. This lab completes the Industrial Communication Challenge we started in the previous lab.
+
+In this lab, you can get a total of 13 points (10 points + 3 bonus points). 7 points for the implementation and the evaluation, 2 points for the presentation and up to 4 points for the competition.
+
+\section*{Industrial Communication Challenge}
+
+For the Industrial Communication Challenge, you are asked by a company to build a sensor network for observing temperature and humidity along a manufacturing line. One point at the edge of the manufacturing line can be connected to the data center, and the company would like to measure temperature and humidity every 10 meters. To try your solution and to compare it to competitors, the company requests you to build a prototype including four measurement points that all collect data every 200ms. They prefer a highly reliable system with the shortest possible collection time and target to receive the data recorded at all nodes after 500~ms at their data center. Moreover, they will test the different systems in parallel, so your solution has to ensure that the nodes running your firmware only become part of your network and are able to withstand interference by other networks close by.
+
+\section*{Part 1 - Evaluation of Part 3 of Lab 1 \textit{(if not done as part of lab 1)} (2.5 points credited to lab 1)}
+
+The evaluation of part 3 of lab 1 generally follows the same guidelines as the evaluation you did in part 2 of lab 1. In Renode you can program a specific node with a slightly modified firmware that initiates the network formation on start. This node shall afterward, at random intervals, send a counter value to all other nodes and all nodes shall log the reception times and counter values they received. With this data, you shall analyze latency and reliability of each of the three receivers in your network. Please use plots again to visualize your results.
+
+For your evaluation, you can use the prepared Renode file \texttt{Renode\_Lab\_2.resc}. You shall run your evaluation both with a range-based wireless medium without loss (line 25 in \texttt{Renode\_Lab\_2.resc}), and with loss (line 26). Comment in the respective line.
+
+
+\section*{Part 2 - Industrial Communication Challenge II (4.0 points)}
+
+In this part of the Industrial Communication Challenge, your task is to collect sensor data.
+
+In lab 1, you formed a multi-hop network. Now we want to use this network for collecting sensor data from each node to the sink node. However, instead of sending actual measurements, you will send random temperature and humidity values. The temperature values should lay in the range between $-25.0$ and $200.0$ degrees Celsius, and the humidity values between $0.0\%$ and $100.0\%$. Your random number generator shall generate values within the given intervals, including the limits of the interval with one decimal place. \textit{(Hint: You can use fixed-point numbers\footnote{\url{https://en.wikipedia.org/wiki/Fixed-point\_arithmetic}}.)}
+
+The protocol you implement shall behave the following. When you press a button on an end device (sink), this device initiates the formation of a network. Any other button presses on any device shall not have any effect until a reboot of the devices. After network formation, all four devices in your network shall perform/generate a measurement every 200ms, timestamp this measurement and send the measurement, the timestamp, the node's node-ID, and the value of a local measurement counter to the sink.  The sink, which also generates and timestamps measurements, collects all the measurements and prints them with the timestamp and the transmission time to the serial interface. To be able to calculate the transmission time, the devices need to be time-synchronized. Instead of implementing a time-synchronization algorithm, you can press the reset button\footnote{You might have to enable the reset button first: \url{https://infocenter.nordicsemi.com/index.jsp?topic=/ug\_nrf52840\_dk/UG/dk/boot\_reset\_but.html}} on all of them simultaneously to start all of them at the same time.
+
+Each measurement shall be printed as a single line in this format:\\\texttt{<nodeiID>;<measurement-counter>;<temp>;<humidity>;<timestamp>;<tx-time>}
+
+For part 4 of this lab, it is crucial that you ensure that only nodes running your firmware will join your network, and that your nodes do not join another network. Moreover, ensure that your solution can handle interference and that your variable types allow large enough values for 5 minutes of operation.
+
+\textit{Note: If the automatic formation of the network is too challenging for you, you can instead implement the network formation of Part 4. As this is easier, you can receive at a maximum 3.0 points in this part if you do so.}
+
+\section*{Part 3 - Evaluation of Part 2 (3.0 points)}
+
+
+To evaluate the reliability and latency of your system, you will use Renode. Instead of pressing a button, you can program a specific node with a slightly modified firmware that initiates the network formation on start.
+
+You may output intermediate outputs at different nodes, but what counts is the output at the sink node in the form given above. With the data printed at the source node, you shall analyze latency, reliability and percentage of sensor readings received in time. Please use plots for your evaluation showing reliability and latency distribution for each node in the network.
+
+For Renode, please use and modify the attached simulation script \texttt{Renode\_Lab\_2.resc}. This script exposes four UART terminals \texttt{term\_1}, \texttt{term\_2}, \texttt{term\_3}, and \texttt{term\_4} via TCP sockets\footnote{\url{https://renode.readthedocs.io/en/latest/host-integration/uart.html}}. You  can use, e.g., Python to read data from them to process it further. You can also take a look at \texttt{pyrenode3} to manage your simulation from Python and have direct access to the output for your evaluation. In the simulation script, you have to adjust the path to the location of the attached modified board description to ensure that not all BLE devices have the same device address.
+
+As a first step, evaluate your system with four nodes. As a second step, evaluate your system twice present in Renode (comment in lines 14, 35–38, 76–98, and 124–134 in \texttt{Renode\_Lab\_2.resc}). For the second step, ensure that only the four nodes belonging to the same line associate and communicate with each other. For both steps, your evaluation shall contain 500 measurement readings at each node. Moreover, you shall run both evaluation steps with a range-based wireless medium without loss (line 25 in \texttt{Renode\_Lab\_2.resc}), and with loss (line 26). Comment in the respective line.
+
+\section*{Part 4 - ICC Competition (4.0 points)}
+
+The company wants to ensure that they choose the best-performing solution for their manufacturing line. Therefore, they perform a competition with multiple rounds, testing all of your solution, and some in parallel to ensure that the solution they choose can handle interference. They will use nRF52840-DK boards for testing. As they cannot test your solution on the actual manufacturing line, they require you to make a few adjustments. First of all, as the testing environment cannot ensure a distance of 10 meters between the devices, they request that you set the transmit power to $-16$dBm\footnote{Example setting the transmit power: \url{https://developer.nordicsemi.com/nRF\_Connect\_SDK/doc/latest/zephyr/samples/bluetooth/hci\_pwr\_ctrl/README.html\#bluetooth-hci-power-control}}. Moreover, to exclude single-hop communication, you shall select the role and node-ID of each node through button presses on the respective device, where node-ID 1 is the sink node and node-ID 4 is the node furthest away from the sink. Please use the LEDs on the nRF52840-DK as indicators which ID the node has. Communication must not skip a node, therefore, for validating it, each node shall add its node-ID to the node-ID present in the packets it receives. To start your protocol, once-again, you shall press a button on the sink node.
+
+If all 12 groups submit lab 2, we will run the following challenge. Each run takes 5 minutes.
+
+\begin{itemize}
+    \item Round 1: 4x 3 group solutions in parallel (selected randomly). The 6 best performing solutions move to round 2. The others receive 1.0 points.
+    \item Round 2: 2x 3 group solutions in parallel (selected randomly). The winner of each round moves to round 3. The others receive 2.0 points.
+    \item Round 3: 1x 2 group solutions in parallel. The winner receives 4.0 points, the second place receives 3.0 points.
+\end{itemize}
+
+% \clearpage
+
+The criteria for determining the best solution in each round is the following. 
+
+\begin{enumerate}
+    \item Percentage of measurements delivered in time (out of $12.000$ measurements)
+    \item Percentage of measurements delivered at all (out of $12.000$ measurements)
+    \item Average transmission time
+\end{enumerate}
+
+If your group does not participate in the challenge, you do not get points for it.
+
+
+\end{document}
